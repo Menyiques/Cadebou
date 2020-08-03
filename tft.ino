@@ -17,7 +17,7 @@
 #define TFT_BL              4  // Display backlight control pin
 
 
-void setup_tft()
+void setupTFT()
 {
     tft.init();
 
@@ -60,6 +60,7 @@ void tft_print(String s, int x, int y, int siz, int colFore){
     tft.setTextDatum(TR_DATUM);
     printAt(s2,240,y*28,3,color);
     }
+    
     void print1AtG(String s1, int y,int color){
     tft.setTextDatum(TC_DATUM);
     printAt(s1,120,y*28,3,color);

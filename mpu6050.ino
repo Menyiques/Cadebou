@@ -4,16 +4,16 @@
  
 // 0x68
 MPU6050 mpu; 
- 
-#define LED_PIN 13
-bool blinkState = false;
- 
+
+
 bool dmpReady = false;  // set true if DMP init was successful
 uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
 uint8_t devStatus;      // return status after each device operation (0 = success, !0 = error)
 uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
 uint16_t fifoCount;     // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
+float new_mpu=0.0;
+float old_mpu=0.0;
  
 Quaternion q;           // [w, x, y, z]
 VectorInt16 aa;         // [x, y, z]
@@ -22,8 +22,8 @@ VectorInt16 aaWorld;    // [x, y, z]
 VectorFloat gravity;    // [x, y, z]
 float ypr[3];           // [yaw, pitch, roll]
  
-void setup_mpu() {
-   tca_select(3);
+void setupMPU() {
+   tca_select(3); //mpu está en el tca 3
     mpu.initialize();
     // Comprobar  conexion
     Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
@@ -33,12 +33,21 @@ void setup_mpu() {
  
     // Valores de calibracion
     // Mio
+    /*
     mpu.setXAccelOffset(905);
     mpu.setYAccelOffset(368);
     mpu.setZAccelOffset(563);
     mpu.setXGyroOffset(54);
     mpu.setYGyroOffset(-57);
     mpu.setZGyroOffset(29);
+    */
+    //Mio2
+    mpu.setXAccelOffset(807);
+    mpu.setYAccelOffset(329);
+    mpu.setZAccelOffset(545);
+    mpu.setXGyroOffset(52);
+    mpu.setYGyroOffset(-56);
+    mpu.setZGyroOffset(20);
     
 /*  //Victor  
     mpu.setXAccelOffset(-4947);
@@ -60,6 +69,11 @@ void setup_mpu() {
  
         // get expected DMP packet size for later comparison
         packetSize = mpu.dmpGetFIFOPacketSize();
+        
+        
+
+
+        
     } else {
         // ERROR!
         // 1 = initial memory load failed
@@ -72,12 +86,12 @@ void setup_mpu() {
 }
  
 
- 
 float get_mpu() {
      tca_select(3);
 
     // Si fallo al iniciar, parar programa    
-    if (!dmpReady) return 0.0;
+    if (dmpReady){
+    
     mpuIntStatus = mpu.getIntStatus();
     fifoCount = mpu.getFIFOCount();
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
@@ -100,19 +114,35 @@ float get_mpu() {
    Serial.print(ypr[1] * 180/M_PI);
    Serial.print("\t");
    Serial.println(ypr[2] * 180/M_PI);
-*/
-   return ypr[0]* 180/M_PI+180;
+  */ 
+
    
    // Mostrar aceleracion
-/*   mpu.dmpGetQuaternion(&q, fifoBuffer);
+   mpu.dmpGetQuaternion(&q, fifoBuffer);
    mpu.dmpGetAccel(&aa, fifoBuffer);
    mpu.dmpGetGravity(&gravity, &q);
    mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+
+/*
    Serial.print("areal\t");
    Serial.print(aaReal.x);
    Serial.print("\t");
    Serial.print(aaReal.y);
    Serial.print("\t");
-   Serial.println(aaReal.z);*/
+   Serial.println(aaReal.z);
+*/
+   new_mpu= ypr[0]*180/M_PI;//noise filter
+   float tantoporciento=(abs(new_mpu-old_mpu))*100.0/360.0;
+ 
+   if (tantoporciento>1.0||abs(new_mpu)<1){
+      new_mpu=old_mpu;
+   }
+   }
+    }else{
+    new_mpu=old_mpu;
     }
+   
+   old_mpu=new_mpu; 
+   return new_mpu; 
+    
 }

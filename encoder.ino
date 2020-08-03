@@ -10,7 +10,7 @@ ESP32Encoder encoderR,encoderL;
 
 
 
-void setup_enc(){
+void setupEnc(){
 
    pinMode(RIGHT_ENCODER_A_PIN, INPUT);
    pinMode(RIGHT_ENCODER_B_PIN, INPUT);  
@@ -18,7 +18,7 @@ void setup_enc(){
    pinMode(LEFT_ENCODER_B_PIN, INPUT);    
     
 	// Enable the weak pull down resistors
-	ESP32Encoder::useInternalWeakPullResistors=true;
+  ESP32Encoder::useInternalWeakPullResistors=UP;
 
   encoderL.clearCount();
   encoderL.setCount(0);
